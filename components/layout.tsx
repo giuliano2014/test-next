@@ -1,22 +1,32 @@
+import { useTranslation } from 'next-i18next'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 const Layout = ({ children }: any) => {
+  const { asPath, locale } = useRouter()
+  const { t } = useTranslation('common')
+
   return (
     <>
       <ul>
         <li>
-          <Link href="/">
-            <a>Home</a>
+          <Link href="/" locale={locale}>
+            <a>{t('navigation.home')}</a>
           </Link>
         </li>
         <li>
-          <Link href="/collection">
-            <a>Collection</a>
+          <Link href="/collection" locale={locale}>
+            <a>{t('navigation.collection')}</a>
           </Link>
         </li>
         <li>
-          <Link href="/about">
-            <a>About</a>
+          <Link href="/about" locale={locale}>
+            <a>{t('navigation.about')}</a>
+          </Link>
+        </li>
+        <li>
+          <Link href={asPath} locale={locale === "fr" ? "en" : "fr"}>
+            <a>{locale === "fr" ? "English" : "Français"}</a>
           </Link>
         </li>
       </ul>
@@ -24,7 +34,7 @@ const Layout = ({ children }: any) => {
       {children}
       <hr />
       <footer>
-        <p>FOOTER</p>
+        <p>Footer</p>
       </footer>
     </>
   )
