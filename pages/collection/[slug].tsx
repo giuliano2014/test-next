@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 const SingleItem = () => {
-  const { locale, query } = useRouter()
+  const { locale, locales, query } = useRouter()
   const { slug } = query
   const { t } = useTranslation('common')
 
@@ -23,7 +23,20 @@ const SingleItem = () => {
   )
 }
 
-export const getServerSideProps = async ({ locale }: any) => ({
+export const getStaticPaths = () => {
+  return {
+    paths: [
+      // if no `locale` is provided only the defaultLocale will be generated
+      { params: { slug: 'my-first-item' }, locale: 'en' },
+      { params: { slug: 'my-second-item' }, locale: 'en' },
+      { params: { slug: 'my-first-item' }, locale: 'fr' },
+      { params: { slug: 'my-second-item' }, locale: 'fr' },
+    ],
+    fallback: true,
+  }
+}
+
+export const getStaticProps = async ({ locale }: any) => ({
   props: {
     ...await serverSideTranslations(locale, ['common']),
   },
