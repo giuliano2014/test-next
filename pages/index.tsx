@@ -17,7 +17,7 @@ const HOME_QUERY = gql`
 
 const Home: NextPage = () => {
   const { t } = useTranslation('common')
-  let { loading, data, error } = useQuery(HOME_QUERY, {
+  const { loading, data, error } = useQuery(HOME_QUERY, {
     variables: {
       id: 'cl7t1xsvsfbvn0buqeiiltvdh',
       locales: 'fr'

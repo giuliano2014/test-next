@@ -16,13 +16,18 @@ const Collection: NextPage = () => {
       <h1>{t('navigation.collection')}</h1>
       <ul>
         <li>
-          <Link href="/collection/my-first-item">
-            <a>First Item</a>
+          <Link href="/en/collection/product-1">
+            <a>Product 1</a>
           </Link>
         </li>
         <li>
-          <Link href="/collection/my-second-item">
-            <a>Second Item</a>
+          <Link href="/en/collection/product-2">
+            <a>Product 2</a>
+          </Link>
+        </li>
+        <li>
+          <Link href="/en/collection/product-3">
+            <a>Product 3</a>
           </Link>
         </li>
       </ul>
