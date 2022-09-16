@@ -3,6 +3,7 @@ import { GetStaticPaths, GetStaticProps } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import Head from 'next/head'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -18,7 +19,14 @@ const SingleItem = ({ product }: any) => {
     return <div>Loading...</div>
   }
   
-  const { description, name } = product
+  const {
+    cover: { alt, url },
+    description,
+    gallery,
+    name
+  } = product
+
+  console.log('GALLERY', gallery)
   
   return (
     <>
@@ -31,6 +39,22 @@ const SingleItem = ({ product }: any) => {
       </Link>
       <h1>{name}</h1>
       <p>{description}</p>
+      <Image
+        src={url}
+        alt={alt}
+        width={500}
+        height={500}
+      />
+      {gallery.map(({alt, id, url}: any) => (
+        <li key={id}>
+          <Image
+            src={url}
+            alt={alt}
+            width={500}
+            height={500}
+          />
+        </li>
+      ))}
     </>
   )
 }
@@ -77,8 +101,17 @@ export const getStaticProps: GetStaticProps = async ({ locale, params }: any) =>
     query: gql`
       query GetProductByLocaleAndSlug($locales: Locale!, $slug: String!) {
         products(locales: [$locales], where: {slug: $slug}) {
-          name
+          cover {
+            alt
+            url
+          }
           description
+          gallery {
+            alt
+            id
+            url
+          }
+          name
         }
       },
     `,
