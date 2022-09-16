@@ -1,45 +1,101 @@
+import { gql } from '@apollo/client'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-const SingleItem = () => {
-  const { locale, locales, query } = useRouter()
-  const { slug } = query
-  const { t } = useTranslation('common')
+import client from '../../apollo-client'
 
+const SingleItem = ({ product }: any) => {
+  const router = useRouter()
+  const { locale } = router
+  const { t } = useTranslation('common')
+  
+  // Display loading until `getStaticProps()` finishes running, and populates the props.
+  if (router.isFallback) {
+    return <div>Loading...</div>
+  }
+  
+  const { description, name } = product
+  
   return (
     <>
       <Head>
-        <title key="metaTitle">{slug}</title>
-        <meta key="metaDescription" name="description" content={`${slug} description`} />
+        <title key="metaTitle">{name}</title>
+        <meta key="metaDescription" name="description" content={description} />
       </Head>
       <Link href="/collection" locale={locale}>
         <a>{t('back')}</a>
       </Link>
-      <h1>{slug}</h1>
+      <h1>{name}</h1>
+      <p>{description}</p>
     </>
   )
 }
 
-export const getStaticPaths = () => {
+export const getStaticPaths: GetStaticPaths = async ({ locales }) => {
+  const { data } = await client.query({
+    query: gql`
+      query GetAllProducts($locales: [Locale!]!) {
+        products(locales: $locales) {
+          localizations(includeCurrent: true, locales: $locales) {
+            slug
+            locale
+          }
+        }
+      }
+    `,
+    variables: {
+      locales: locales,
+    },
+  })
+
+  const getAllProducts = data.products.map(({ localizations }: any) => {
+    return localizations
+  })
+
+  const formatAllProducts = getAllProducts.flatMap((product: any) => {
+    return product
+  })
+
+  const paths = formatAllProducts.map(({ locale, slug }: any) => {
+    return {params: { slug: slug}, locale: locale }
+  })
+
   return {
-    paths: [
-      // if no `locale` is provided only the defaultLocale will be generated
-      { params: { slug: 'my-first-item' }, locale: 'en' },
-      { params: { slug: 'my-second-item' }, locale: 'en' },
-      { params: { slug: 'my-first-item' }, locale: 'fr' },
-      { params: { slug: 'my-second-item' }, locale: 'fr' },
-    ],
+    paths: paths,
     fallback: true,
   }
 }
 
-export const getStaticProps = async ({ locale }: any) => ({
-  props: {
-    ...await serverSideTranslations(locale, ['common']),
-  },
-})
+export const getStaticProps: GetStaticProps = async ({ locale, params }: any) => {
+  const { slug } = params
+
+  const { data } = await client.query({
+    query: gql`
+      query GetProductByLocaleAndSlug($locales: Locale!, $slug: String!) {
+        products(locales: [$locales], where: {slug: $slug}) {
+          name
+          description
+        }
+      },
+    `,
+    variables: {
+      locales: locale,
+      slug: slug,
+    },
+  })
+
+  const { products } = data
+  
+  return {
+    props: {
+      product: products[0],
+      ...await serverSideTranslations(locale, ['common']),
+    },
+  }
+}
 
 export default SingleItem
