@@ -33,31 +33,36 @@ const SingleItem = ({ product }: any) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async ({ locales }: any) => {
-  const [ fr, en ] = locales
-
   const { data } = await client.query({
     query: gql`
-      query Products($localesFr: Locale!, $localesEn: Locale!) {
-        ${fr}: products(locales: [$localesFr]) {
-          slug
+      query GetAllProducts($locales: [Locale!]!) {
+        products(locales: $locales) {
+          localizations(includeCurrent: true, locales: $locales) {
+            slug
+            locale
+          }
         }
-        ${en}: products(locales: [$localesEn]) {
-          slug
-        }
-      },
+      }
     `,
     variables: {
-      localesFr: fr,
-      localesEn: en,
+      locales: locales,
     },
   })
 
-  const pathsFr = data[fr].map((product: any) => ({ params: { slug: product.slug }, locale: fr }))
-  const pathsEn =  data[en].map((product: any) => ({ params: { slug: product.slug }, locale: en }))
-  const paths = [...pathsFr, ...pathsEn]
+  const getAllProducts = data.products.map(({ localizations }: any) => {
+    return localizations
+  })
+
+  const formatAllProducts = getAllProducts.flatMap((product: any) => {
+    return product
+  })
+
+  const paths = formatAllProducts.map(({ locale, slug }: any) => {
+    return {params: { slug: slug}, locale: locale }
+  })
 
   return {
-    paths,
+    paths: paths,
     fallback: true,
   }
 }
