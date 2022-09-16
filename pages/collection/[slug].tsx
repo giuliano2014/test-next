@@ -5,34 +5,37 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+
 import client from '../../apollo-client'
 
 const SingleItem = ({ product }: any) => {
   const router = useRouter()
   const { locale } = router
   const { t } = useTranslation('common')
- 
+  
   // Display loading until `getStaticProps()` finishes running, and populates the props.
   if (router.isFallback) {
     return <div>Loading...</div>
   }
-
+  
+  const { description, name } = product
+  
   return (
     <>
       <Head>
-        <title key="metaTitle">{product.name}</title>
-        <meta key="metaDescription" name="description" content={product.description} />
+        <title key="metaTitle">{name}</title>
+        <meta key="metaDescription" name="description" content={description} />
       </Head>
       <Link href="/collection" locale={locale}>
         <a>{t('back')}</a>
       </Link>
-      <h1>{product.name}</h1>
-      <p>{product.description}</p>
+      <h1>{name}</h1>
+      <p>{description}</p>
     </>
   )
 }
 
-export const getStaticPaths: GetStaticPaths = async ({ locales }: any) => {
+export const getStaticPaths: GetStaticPaths = async ({ locales }) => {
   const { data } = await client.query({
     query: gql`
       query GetAllProducts($locales: [Locale!]!) {
