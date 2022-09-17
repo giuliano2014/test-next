@@ -3,11 +3,29 @@ import { GetStaticPaths, GetStaticProps } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import Head from 'next/head'
-import Image from 'next/image'
+// import Image from 'next/image'
+import Image from 'next/future/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 import client from '../../apollo-client'
+
+// Pixel GIF code adapted from https://stackoverflow.com/a/33919020/266535
+const keyStr =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+
+const triplet = (e1: number, e2: number, e3: number) =>
+  keyStr.charAt(e1 >> 2) +
+  keyStr.charAt(((e1 & 3) << 4) | (e2 >> 4)) +
+  keyStr.charAt(((e2 & 15) << 2) | (e3 >> 6)) +
+  keyStr.charAt(e3 & 63)
+
+const rgbDataURL = (r: number, g: number, b: number) =>
+  `data:image/gif;base64,R0lGODlhAQABAPAA${
+    triplet(0, r, g) + triplet(b, 255, 255)
+  }/yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==`
+
+const css = { width: '100%', height: 'auto' }
 
 const SingleItem = ({ product }: any) => {
   const router = useRouter()
@@ -20,13 +38,11 @@ const SingleItem = ({ product }: any) => {
   }
   
   const {
-    cover: { alt, url },
+    cover: { alt, height, url, width },
     description,
     gallery,
     name
   } = product
-
-  console.log('GALLERY', gallery)
   
   return (
     <>
@@ -40,21 +56,51 @@ const SingleItem = ({ product }: any) => {
       <h1>{name}</h1>
       <p>{description}</p>
       <Image
-        src={url}
         alt={alt}
-        width={500}
-        height={500}
+        blurDataURL={rgbDataURL(237, 181, 6)}
+        height={height}
+        placeholder="blur"
+        sizes="100vw"
+        src={url}
+        style={css}
+        width={width}
       />
-      {gallery.map(({alt, id, url}: any) => (
+      {gallery.map(({ alt, height, id, url, width }: any) => (
         <li key={id}>
           <Image
-            src={url}
             alt={alt}
-            width={500}
-            height={500}
+            blurDataURL={rgbDataURL(237, 181, 6)}
+            height={height}
+            placeholder="blur"
+            sizes="100vw"
+            src={url}
+            style={css}
+            width={width}
           />
         </li>
       ))}
+      {/* <Image
+        alt={alt}
+        blurDataURL={rgbDataURL(237, 181, 6)}
+        height={height}
+        layout={"responsive"}
+        placeholder="blur"
+        src={url}
+        width={width}
+      />
+      {gallery.map(({ alt, height, id, url, width }: any) => (
+        <li key={id}>
+          <Image
+            alt={alt}
+            blurDataURL={rgbDataURL(237, 181, 6)}
+            height={height}
+            layout={"responsive"}
+            placeholder="blur"
+            src={url}
+            width={width}
+          />
+        </li>
+      ))} */}
     </>
   )
 }
@@ -103,13 +149,17 @@ export const getStaticProps: GetStaticProps = async ({ locale, params }: any) =>
         products(locales: [$locales], where: {slug: $slug}) {
           cover {
             alt
+            height
             url
+            width
           }
           description
           gallery {
             alt
+            height
             id
             url
+            width
           }
           name
         }
