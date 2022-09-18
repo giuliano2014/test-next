@@ -5,6 +5,10 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   i18n,
+  images: {
+    domains: ['media.graphassets.com'],
+  },
+  experimental: { images: { allowFutureImage: true } }
 }
 
 module.exports = nextConfig
