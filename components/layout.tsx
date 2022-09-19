@@ -30,6 +30,10 @@ const Layout = ({ children }: any) => {
           </Link>
         </li>
       </ul>
+      <div className="nav-price snipcart-checkout">
+        <span>🛒</span>
+        <p className="snipcart-total-price">$0.00</p>
+      </div>
       <hr />
       {children}
       <hr />

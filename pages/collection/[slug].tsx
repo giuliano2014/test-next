@@ -41,7 +41,10 @@ const SingleItem = ({ product }: any) => {
     cover: { alt, height, url, width },
     description,
     gallery,
-    name
+    id,
+    name,
+    price,
+    slug,
   } = product
   
   return (
@@ -53,8 +56,19 @@ const SingleItem = ({ product }: any) => {
       <Link href="/collection" locale={locale}>
         <a>{t('back')}</a>
       </Link>
-      <h1>{name}</h1>
+      <h1>{name}</h1> 
       <p>{description}</p>
+      <p>{price} { locale === 'en' ? '$' : '€'}</p>
+      <button
+        className="btn snipcart-add-item"
+        data-item-id={id}
+        data-item-price={price}
+        data-item-url={`products/${slug}`}
+        data-item-image={url}
+        data-item-name={product.name}
+      >
+        Add to cart 🛒
+      </button>
       <Image
         alt={alt}
         blurDataURL={rgbDataURL(237, 181, 6)}
@@ -161,7 +175,10 @@ export const getStaticProps: GetStaticProps = async ({ locale, params }: any) =>
             url
             width
           }
+          id
           name
+          price
+          slug
         }
       },
     `,
